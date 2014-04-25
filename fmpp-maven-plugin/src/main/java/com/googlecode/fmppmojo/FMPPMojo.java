@@ -79,6 +79,16 @@ public class FMPPMojo extends AbstractMojo {
 	 * @since 1.0
 	 */
 	private File templateDirectory;
+
+	/**
+	 * Specifies that the processing of which source files can be skipped, if the
+	 * source file was not modified after the last modification time of the output file.
+	 * 
+	 * @parameter  default-value="static"
+	 * @optional
+	 * @since 1.0.1
+	 */
+	private String skipUnchanged;
 	
 	/**
 	 * Location of the FreeMarker config file.
@@ -99,6 +109,8 @@ public class FMPPMojo extends AbstractMojo {
 			Settings settings = new Settings( new File(".") );
 			settings.set( "sourceRoot", templateDirectory.getAbsolutePath() );
 			settings.set( "outputRoot", outputDirectory.getAbsolutePath() );
+			settings.set( Settings.NAME_SKIP_UNCHANGED, skipUnchanged );
+			System.out.println("Setting skipUnchanged to: " + skipUnchanged);
 			
 			settings.load( cfgFile );
 			settings.addProgressListener( new ConsoleProgressListener() );
@@ -137,5 +149,11 @@ public class FMPPMojo extends AbstractMojo {
 		if ( templateDirectory == null) throw new MojoExecutionException( String.format( DEFAULT_ERROR_MSG, "templateDirectory") );
 		
 		if ( cfgFile == null) throw new MojoExecutionException( String.format( DEFAULT_ERROR_MSG, "cfgFile") );
+		
+		if ( skipUnchanged == null) {
+		  skipUnchanged = "none";
+		} else if (!(skipUnchanged.equals("none") || skipUnchanged.equals("all") || skipUnchanged.equals("static"))) {
+		  throw new MojoExecutionException( "The parameter 'skipUnchanged' can be set to only one of 'none', 'all' or 'static'" );
+		}
 	}
 }
